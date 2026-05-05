@@ -10,7 +10,7 @@ const Services = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="bg-brand-dark"
+      className="min-h-screen"
     >
       <Banner 
         title="Our Services" 
@@ -23,10 +23,10 @@ const Services = () => {
       </div>
 
       {/* Trust Message Section */}
-      <section className="py-16 bg-gradient-to-b from-[#111] to-black border-t border-white/5 flex items-center justify-center">
+      <section className="py-16 flex items-center justify-center">
         <div className="container mx-auto px-6 relative z-10 text-center">
-           <h2 className="text-3xl md:text-5xl font-bold mb-6">Transparency is our <span className="text-brand-gold italic">Core Value</span></h2>
-           <p className="text-gray-300 max-w-2xl mx-auto font-body italic">
+           <h2 className="text-3xl md:text-5xl font-bold mb-6 text-brand-text">Transparency is our <span className="text-brand-red italic">Core Value</span></h2>
+           <p className="text-gray-600 max-w-2xl mx-auto font-body italic">
              "We don't just value gold; we value the trust you place in us."
            </p>
         </div>

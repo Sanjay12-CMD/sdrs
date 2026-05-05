@@ -9,11 +9,15 @@ export default {
       colors: {
         brand: {
           red: "#8B0000",
-          gold: "#FFD700",
-          "gold-light": "#FFFACD",
-          "gold-dark": "#B8860B",
+          gold: "#A67C00",
+          "gold-light": "#E6C973",
+          "gold-dark": "#8C6A1F",
           dark: "#0A0A0A",
           surface: "#1A1A1A",
+          light: "#FEF9E5",
+          "light-dark": "#F5E6B5",
+          text: "#1A1A1A",
+          "primary-text": "#1A1A1A",
         },
       },
       fontFamily: {
@@ -40,8 +44,9 @@ export default {
         },
       },
       backgroundImage: {
-        'gold-gradient': 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)',
+        'gold-gradient': 'linear-gradient(135deg, #A67C00 0%, #8C6A1F 100%)',
         'dark-gradient': 'linear-gradient(180deg, #1A1A1A 0%, #0A0A0A 100%)',
+        'premium-bg': 'radial-gradient(circle at 0% 0%, #FEF9E5 0%, #F5E6B5 100%)',
       },
     },
   },

@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, CircleDollarSign, HandCoins, CalendarClock, Briefcase, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { 
+  Coins, Key, RefreshCw, Zap, Hammer, ChevronDown, ChevronUp, 
+  Gem, CreditCard, ArrowRightLeft, Star, Calendar, ShoppingCart 
+} from 'lucide-react';
 import goldValImg from '../../assets/gold-val.png';
 import goldCashImg from '../../assets/gold-cash.png';
-import goldCoins from '../../assets/gold-coins.png';
+import silverAssets from '../../assets/silver-assets.png';
+import diamondAssets from '../../assets/diamond-necklace.png';
+import creditCardAssets from '../../assets/credit-card-assets.png';
+import loanAssets from '../../assets/loan-assets.png';
+import exchangeAssets from '../../assets/exchange-assets.png';
+import manufacturingAssets from '../../assets/manufacturing-assets.png';
+import calculatorAssets from '../../assets/calculator-assets.png';
 
 const ServiceCard = ({ title, icon: Icon, description, index, image, extendedDescription }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -14,30 +23,35 @@ const ServiceCard = ({ title, icon: Icon, description, index, image, extendedDes
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.1, duration: 0.6 }}
-      className="glass-card flex flex-col group relative bg-white/5"
+      className="glass-card flex flex-col group relative bg-white/5 overflow-hidden"
     >
-      <div className="h-48 relative overflow-hidden rounded-xl mb-6 hidden md:block">
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#222] to-black" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-brand-gold opacity-10 blur-sm">
-          <Icon size={100} />
+      <div className="h-48 relative overflow-hidden rounded-xl mb-6">
+        <img 
+          src={image} 
+          alt={title} 
+          className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 [filter:brightness(1.1)]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-brand-red opacity-10 blur-[2px]">
+          <Icon size={80} />
         </div>
-        <div className="absolute top-4 right-4 w-12 h-12 rounded-xl bg-brand-dark/80 backdrop-blur-md flex items-center justify-center text-brand-gold border border-brand-gold/30">
+        <div className="absolute top-4 right-4 w-12 h-12 rounded-xl bg-white/90 backdrop-blur-md flex items-center justify-center text-brand-red border border-black/5 shadow-lg z-10">
           <Icon size={24} />
         </div>
       </div>
       
       <div className="md:hidden flex items-center gap-4 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-brand-dark/80 backdrop-blur-md flex items-center justify-center text-brand-gold border border-brand-gold/30">
+        <div className="w-12 h-12 rounded-xl bg-white/50 backdrop-blur-md flex items-center justify-center text-brand-red border border-brand-red/50 shadow-sm">
           <Icon size={24} />
         </div>
-        <h3 className="text-xl font-bold">{title}</h3>
+        <h3 className="text-xl font-bold text-brand-text">{title}</h3>
       </div>
 
-      <div className="flex flex-col flex-grow">
-        <h3 className="hidden md:block text-2xl font-bold mb-4 group-hover:text-brand-gold transition-colors duration-300">
+      <div className="flex flex-col flex-grow px-6 pb-6 md:px-0 md:pb-0">
+        <h3 className="hidden md:block text-2xl font-bold mb-4 group-hover:text-brand-red transition-colors duration-300 text-brand-text">
           {title}
         </h3>
-        <p className="text-gray-400 text-sm leading-relaxed mb-6 font-body">
+        <p className="text-gray-600 text-sm leading-relaxed mb-6 font-body">
           {description}
         </p>
         
@@ -47,7 +61,7 @@ const ServiceCard = ({ title, icon: Icon, description, index, image, extendedDes
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="text-gray-400 text-sm leading-relaxed mb-6 font-body overflow-hidden border-t border-white/10 pt-4"
+              className="text-gray-600 text-sm leading-relaxed mb-6 font-body overflow-hidden border-t border-black/5 pt-4"
             >
               {extendedDescription}
             </motion.div>
@@ -56,11 +70,11 @@ const ServiceCard = ({ title, icon: Icon, description, index, image, extendedDes
 
         <button 
           onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-auto flex items-center gap-2 text-brand-gold font-bold uppercase text-[10px] tracking-widest group-hover:gap-4 transition-all duration-300 focus:outline-none"
+          className="mt-auto flex items-center gap-2 text-brand-red font-bold uppercase text-[10px] tracking-widest group-hover:gap-4 transition-all duration-300 focus:outline-none"
         >
           {isExpanded ? 'Show Less' : 'Learn More'} 
           {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          <div className="h-px bg-brand-gold flex-grow opacity-50" />
+          <div className="h-px bg-brand-red flex-grow opacity-50" />
         </button>
       </div>
     </motion.div>
@@ -72,76 +86,91 @@ const ServicesSection = () => {
     { 
       title: "Cash for Gold", 
       icon: Coins, 
-      description: "Convert your gold asset into liquidated cash within minutes. Best market rates guaranteed.",
-      extendedDescription: "We use advanced valuation methods to ensure you get the absolute highest value for your gold. Our process is transparent, secure, and requires minimal documentation.",
+      description: "Convert your gold ornaments into instant cash at the highest market price with transparent testing.",
+      extendedDescription: "We use high-precision XRF machines to test your gold purity without any damage. Get paid instantly via cash or bank transfer based on live market rates.",
       image: goldCashImg
     },
     { 
       title: "Cash for Silver", 
-      icon: HandCoins, // Removed CircleDollarSign to remove $ visual, using HandCoins which represents exchange
-      description: "Transparent weighing and valuation for your silver articles and bars for immediate ₹ Payment.",
-      extendedDescription: "Get the best spot rate in ₹ for silver coins, bars, and jewelry. We verify purity in front of you and process immediate bank transfers or cash payouts.",
+      icon: Zap, 
+      description: "Fastest way to get cash for your silver articles. Walk in with silver, walk out with money.",
+      extendedDescription: "No long waiting times or complex documentation. We provide spot valuation and immediate settlement for all silver items.",
+      image: silverAssets
+    },
+    { 
+      title: "Cash for Diamond", 
+      icon: Gem, 
+      description: "Get the best market value for your diamonds with expert certification and instant settlement.",
+      extendedDescription: "We evaluate diamonds based on the 4Cs (Cut, Color, Clarity, Carat). Our experts provide a fair market valuation and immediate cash payment.",
+      image: diamondAssets
+    },
+    { 
+      title: "Cash for Credit Card", 
+      icon: CreditCard, 
+      description: "Emergency cash withdrawal services against your credit card limit with low processing fees.",
+      extendedDescription: "Need urgent liquidity? We provide instant cash against your credit card limit with a secure and transparent process. Instant bank transfer available.",
+      image: creditCardAssets
+    },
+    { 
+      title: "Auction Gold / Pledging Gold Release", 
+      icon: Key, 
+      description: "We help you release your gold from banks, pawn shops, or auction houses with minimal hassle.",
+      extendedDescription: "Stuck with high-interest gold loans or facing auction? We'll clear your dues directly, release your gold, and pay you the remaining balance at current market rates.",
+      image: loanAssets
+    },
+    { 
+      title: "Gold Loan Takeover Speciality", 
+      icon: ArrowRightLeft, 
+      description: "Specialized service to transfer your high-interest gold loans to more affordable rates.",
+      extendedDescription: "We specialize in taking over your existing gold loans from other financiers and banks, providing you with lower interest rates and additional top-up cash.",
       image: goldValImg
     },
     { 
-      title: "Gold Loan", 
-      icon: CalendarClock, 
-      description: "Get instant liquidity against your gold with low-interest rates and flexible terms.",
-      extendedDescription: "Choose from multiple schemes tailored to your repayment capacity. Enjoy the lowest interest rates starting from 0.89% per month with 100% safety of your ornaments.",
-      image: goldValImg
-    },
-    { 
-      title: "EMI Gold Loan", 
-      icon: CalendarClock, 
-      description: "Repay your gold loan in easy monthly installments that fit your budget.",
-      extendedDescription: "Structured repayment plans that help you retrieve your gold systematically. No hidden charges or pre-closure penalties.",
+      title: "Super Gold Loan (95% Gold Value)", 
+      icon: Star, 
+      description: "Get the maximum possible value for your gold with our Super Gold Loan scheme offering up to 95% LTV.",
+      extendedDescription: "Unlock the true potential of your gold. We offer one of the highest loan-to-value ratios in the market, ensuring you get the most money for your assets.",
       image: goldCashImg
     },
     { 
-      title: "Pledge Release", 
-      icon: Briefcase, 
-      description: "We help you release your pledged gold from other banks or financiers.",
-      extendedDescription: "Stuck with high-interest loans? We will clear your balance directly with your current provider and release your gold seamlessly.",
+      title: "EMI Gold Loan (95% Gold Value)", 
+      icon: Calendar, 
+      description: "Repay your gold loan in easy monthly installments with high valuation and low interest.",
+      extendedDescription: "Plan your finances better with our EMI-based gold loans. Get up to 95% of your gold's value and repay in flexible monthly schedules.",
+      image: calculatorAssets
+    },
+    { 
+      title: "Gold Purchase Loan (95% Gold Value)", 
+      icon: ShoppingCart, 
+      description: "Financing solution to help you purchase new gold assets with minimal down payment.",
+      extendedDescription: "Want to invest in new gold? We provide purchase loans with up to 95% financing, making it easier for you to grow your gold portfolio.",
       image: goldValImg
     },
     { 
-      title: "Loan Takeover", 
+      title: "Exchange Gold for Cash", 
       icon: RefreshCw, 
-      description: "Switch your existing gold loan to SDRS for lower interest rates and better service.",
-      extendedDescription: "Transfer your loan to us and enjoy higher LTV, lower interest, and top-tier customer service without any hassle.",
-      image: goldValImg
+      description: "Turn your old, broken, or unused gold jewelry into immediate liquid cash with zero hidden deductions.",
+      extendedDescription: "Whether it's a single ring or a collection of heirlooms, we provide the best exchange value in Coimbatore. Our process is 100% transparent and ethical.",
+      image: exchangeAssets
+    },
+    { 
+      title: "Manufacturing Gold", 
+      icon: Hammer, 
+      description: "Custom gold manufacturing and wholesale services. Delivery completed within 1 week.",
+      extendedDescription: "From intricate traditional designs to modern masterpieces, our skilled artisans craft gold with perfection. We offer competitive rates for custom orders and guarantee delivery within one week.",
+      image: manufacturingAssets
     },
   ];
 
   return (
-    <section className="py-24 bg-gradient-to-t from-black to-[#111] relative overflow-hidden" id="services">
-      {/* Decorative Floating Coins */}
-      <motion.img 
-        src={goldCoins}
-        alt=""
-        className="absolute -left-20 top-1/4 w-64 opacity-20 blur-sm pointer-events-none"
-        animate={{ 
-          y: [0, 50, 0],
-          rotate: [0, 10, 0]
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.img 
-        src={goldCoins}
-        alt=""
-        className="absolute -right-20 bottom-1/4 w-64 opacity-20 blur-sm pointer-events-none"
-        animate={{ 
-          y: [0, -50, 0],
-          rotate: [0, -10, 0]
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-      />
+    <section className="py-24 relative overflow-hidden" id="services">
+
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16">
-          <span className="text-brand-gold font-bold tracking-[0.3em] uppercase text-xs mb-4 block">Our Solutions</span>
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">Premium Gold Finance</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-brand-gold to-[#B8860B] mx-auto mb-8" />
+          <span className="text-brand-red font-bold tracking-[0.3em] uppercase text-xs mb-4 block">Our Solutions</span>
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-brand-text">Premium Gold Finance</h2>
+          <div className="w-24 h-1 bg-gradient-to-r from-brand-red to-brand-gold mx-auto mb-8" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

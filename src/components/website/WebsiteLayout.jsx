@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 const WebsiteLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-brand-dark flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
         {children}

@@ -28,7 +28,7 @@ const WhyChooseUs = () => {
   ];
 
   return (
-    <section className="py-32 bg-gradient-to-b from-[#111] to-black overflow-hidden relative border-t border-white/5">
+    <section className="py-32 overflow-hidden relative border-t border-black/5">
       <div className="container mx-auto px-6">
         <div className="flex flex-col lg:flex-row items-center gap-20">
           
@@ -40,7 +40,7 @@ const WhyChooseUs = () => {
             viewport={{ once: true }}
             transition={{ duration: 1 }}
           >
-            <div className="relative z-10 glass-premium p-12 rounded-[3rem] border-white/5 min-h-[400px] flex flex-col justify-center items-center text-center shadow-xl bg-gradient-to-tr from-[#1a1a1a] to-[#0a0a0a] overflow-hidden">
+            <div className="relative z-10 glass-premium p-12 rounded-[3rem] border-black/5 min-h-[400px] flex flex-col justify-center items-center text-center shadow-xl bg-white/20 overflow-hidden">
                 <motion.div 
                   className="relative z-10 w-full max-w-xs mb-8"
                   animate={{ 
@@ -56,8 +56,8 @@ const WhyChooseUs = () => {
                     className="relative z-10 w-full h-auto drop-shadow-[0_20px_50px_rgba(212,175,55,0.2)] rounded-xl"
                   />
                 </motion.div>
-                <h3 className="text-3xl font-bold font-heading text-white tracking-widest mb-4">Integrity First</h3>
-                <p className="text-gray-400 font-body">
+                <h3 className="text-3xl font-bold font-heading text-brand-text tracking-widest mb-4">Integrity First</h3>
+                <p className="text-gray-600 font-body">
                   "Our valuation is final, our trust is eternal. Walk in with gold, walk out with freedom."
                 </p>
             </div>
@@ -75,12 +75,12 @@ const WhyChooseUs = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <span className="text-brand-gold font-bold tracking-[0.4em] uppercase text-xs mb-6 block">Our Promise</span>
-              <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">
+              <span className="text-brand-red font-bold tracking-[0.4em] uppercase text-xs mb-6 block">Our Promise</span>
+              <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight text-brand-text">
                 Why Choose <br />
-                <span className="text-brand-gold italic">SDRS Gold Finance</span>
+                <span className="text-brand-red italic">SDRS Gold Finance</span>
               </h2>
-              <p className="text-gray-400 font-body text-lg leading-relaxed mb-12 max-w-xl">
+              <p className="text-gray-600 font-body text-lg leading-relaxed mb-12 max-w-xl">
                 We've built a reputation for providing straightforward and swift financial assistance with pure transparency.
               </p>
 
@@ -94,12 +94,12 @@ const WhyChooseUs = () => {
                     transition={{ delay: index * 0.2 }}
                     className="flex gap-6 items-start"
                   >
-                    <div className="text-brand-gold mt-1">
+                    <div className="text-brand-red mt-1">
                       <item.icon size={28} />
                     </div>
                     <div>
-                      <h4 className="text-xl font-bold mb-2 text-white">{item.title}</h4>
-                      <p className="text-gray-500 text-sm font-body leading-relaxed">{item.description}</p>
+                      <h4 className="text-xl font-bold mb-2 text-brand-text">{item.title}</h4>
+                      <p className="text-gray-600 text-sm font-body leading-relaxed">{item.description}</p>
                     </div>
                   </motion.div>
                 ))}
