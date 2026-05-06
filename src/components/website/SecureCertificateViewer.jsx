@@ -14,12 +14,12 @@ const SecureCertificateViewer = ({ imageId, className = "" }) => {
       try {
         setLoading(true);
         // 1. Fetch short-lived token
-        const tokenRes = await fetch(`/api/v1/certificates/token/${imageId}`);
+        const tokenRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/certificates/token/${imageId}`);
         if (!tokenRes.ok) throw new Error('Failed to fetch security token');
         const { token } = await tokenRes.json();
 
         // 2. Fetch the actual image using the token
-        const imageRes = await fetch(`/api/v1/certificates/image/${imageId}?token=${token}`);
+        const imageRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/certificates/image/${imageId}?token=${token}`);
         if (!imageRes.ok) throw new Error('Failed to load image');
         const blob = await imageRes.blob();
         

@@ -15,7 +15,7 @@ const RateCard = ({ title, weight, rate, trend, delay }) => {
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
         {trend === 'up' ? <TrendingUp size={64} className="text-brand-red" /> : <TrendingDown size={64} className="text-brand-red" />}
       </div>
-      
+
       <span className="text-brand-red font-bold uppercase tracking-widest text-xs mb-4">{title}</span>
       <h3 className="text-4xl md:text-5xl font-bold text-brand-text mb-2">
         ₹{rate}
@@ -23,7 +23,7 @@ const RateCard = ({ title, weight, rate, trend, delay }) => {
       <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">
         / {weight}
       </p>
-      
+
       <div className={`mt-6 flex items-center gap-2 text-xs font-bold px-3 py-1 rounded-full ${trend === 'up' ? 'bg-green-500/10 text-green-500' : 'bg-brand-red/10 text-brand-red'}`}>
         {trend === 'up' ? '+' : '-'} Live Market
       </div>
@@ -51,7 +51,7 @@ const GoldRateSection = () => {
 
   const fetchRates = async () => {
     try {
-      const response = await axios.get('/api/v1/rates/live');
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/rates/live`);
       if (response.data.status === 'success') {
         const data = response.data.data;
         const dateObj = new Date(data.lastUpdated);
@@ -81,7 +81,7 @@ const GoldRateSection = () => {
     <section className="py-20 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(166,124,0,0.05)_0%,transparent_70%)]" />
-      
+
       <div className="container mx-auto px-6 relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
@@ -96,7 +96,7 @@ const GoldRateSection = () => {
               Coimbatore Rate (Based on Chennai Market). Prices are updated automatically every 5 minutes based on live market indices.
             </p>
           </div>
-          
+
           <div className="flex flex-col items-end gap-2">
             {error && <span className="text-brand-red text-xs font-bold uppercase">{error}</span>}
             <div className="flex items-center gap-3 bg-white/20 border border-black/5 px-6 py-3 rounded-2xl">
@@ -109,33 +109,33 @@ const GoldRateSection = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          <RateCard 
-            title="Gold 24K" 
-            weight="1 Gram" 
-            rate={rates.gold24k} 
-            trend={rates.trends.gold24k} 
-            delay={0.1} 
+          <RateCard
+            title="Gold 24K"
+            weight="1 Gram"
+            rate={rates.gold24k}
+            trend={rates.trends.gold24k}
+            delay={0.1}
           />
-          <RateCard 
-            title="Gold 22K" 
-            weight="1 Gram" 
-            rate={rates.gold22k} 
-            trend={rates.trends.gold22k} 
-            delay={0.2} 
+          <RateCard
+            title="Gold 22K"
+            weight="1 Gram"
+            rate={rates.gold22k}
+            trend={rates.trends.gold22k}
+            delay={0.2}
           />
-          <RateCard 
-            title="Gold 18K" 
-            weight="1 Gram" 
-            rate={rates.gold18k} 
-            trend={rates.trends.gold18k} 
-            delay={0.3} 
+          <RateCard
+            title="Gold 18K"
+            weight="1 Gram"
+            rate={rates.gold18k}
+            trend={rates.trends.gold18k}
+            delay={0.3}
           />
-          <RateCard 
-            title="Silver" 
-            weight="1 Gram" 
-            rate={rates.silver} 
-            trend={rates.trends.silver} 
-            delay={0.4} 
+          <RateCard
+            title="Silver"
+            weight="1 Gram"
+            rate={rates.silver}
+            trend={rates.trends.silver}
+            delay={0.4}
           />
         </div>
 
@@ -149,7 +149,7 @@ const GoldRateSection = () => {
               <p className="text-gray-600 text-sm">We offer the highest price for your gold in Coimbatore.</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
             className="btn-premium !py-3 !px-8 whitespace-nowrap"
           >
