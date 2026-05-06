@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Correct production backend URL fallback
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sdrsapi.sdrsgoldfinance.com/api';
+// Base URL is the root domain. We add /api here so all calls start with /api
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://sdrsapi.sdrsgoldfinance.com') + '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

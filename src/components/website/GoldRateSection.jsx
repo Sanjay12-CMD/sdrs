@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Clock, MapPin } from 'lucide-react';
-import axios from 'axios';
+import api from '../../api/axios';
 
 const RateCard = ({ title, weight, rate, trend, delay }) => {
   return (
@@ -51,7 +51,7 @@ const GoldRateSection = () => {
 
   const fetchRates = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/rates/live`);
+      const response = await api.get('/v1/rates/live');
       if (response.data.status === 'success') {
         const data = response.data.data;
         const dateObj = new Date(data.lastUpdated);
