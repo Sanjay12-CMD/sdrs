@@ -13,18 +13,18 @@ const RateCard = ({ title, weight, rate, trend, delay }) => {
       className="glass-card gold-border-animate flex flex-col items-center text-center p-8 group relative"
     >
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-        {trend === 'up' ? <TrendingUp size={64} className="text-brand-red" /> : <TrendingDown size={64} className="text-brand-red" />}
+        {trend === 'down' ? <TrendingDown size={64} className="text-brand-red" /> : <TrendingUp size={64} className="text-brand-red" />}
       </div>
 
       <span className="text-brand-red font-bold uppercase tracking-widest text-xs mb-4">{title}</span>
       <h3 className="text-4xl md:text-5xl font-bold text-brand-text mb-2">
-        ₹{rate}
+        ₹{rate || '---'}
       </h3>
       <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">
         / {weight}
       </p>
 
-      <div className={`mt-6 flex items-center gap-2 text-xs font-bold px-3 py-1 rounded-full ${trend === 'up' ? 'bg-green-500/10 text-green-500' : 'bg-brand-red/10 text-brand-red'}`}>
+      <div className={`mt-6 flex items-center gap-2 text-xs font-bold px-3 py-1 rounded-full ${trend === 'down' ? 'bg-brand-red/10 text-brand-red' : 'bg-green-500/10 text-green-500'}`}>
         {trend === 'up' ? '+' : '-'} Live Market
       </div>
     </motion.div>
@@ -55,11 +55,13 @@ const GoldRateSection = () => {
       if (response.data.status === 'success') {
         const data = response.data.data;
         const dateObj = new Date(data.lastUpdated);
-        setRates({
+        setRates(prev => ({
+          ...prev,
           ...data,
           lastUpdated: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          lastUpdatedDate: dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-        });
+          lastUpdatedDate: dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+          trends: data.trends || prev.trends // Ensure trends is never undefined
+        }));
         setError(null);
       }
     } catch (err) {
@@ -113,28 +115,28 @@ const GoldRateSection = () => {
             title="Gold 24K"
             weight="1 Gram"
             rate={rates.gold24k}
-            trend={rates.trends.gold24k}
+            trend={rates.trends?.gold24k || 'up'}
             delay={0.1}
           />
           <RateCard
             title="Gold 22K"
             weight="1 Gram"
             rate={rates.gold22k}
-            trend={rates.trends.gold22k}
+            trend={rates.trends?.gold22k || 'up'}
             delay={0.2}
           />
           <RateCard
             title="Gold 18K"
             weight="1 Gram"
             rate={rates.gold18k}
-            trend={rates.trends.gold18k}
+            trend={rates.trends?.gold18k || 'up'}
             delay={0.3}
           />
           <RateCard
             title="Silver"
             weight="1 Gram"
             rate={rates.silver}
-            trend={rates.trends.silver}
+            trend={rates.trends?.silver || 'up'}
             delay={0.4}
           />
         </div>

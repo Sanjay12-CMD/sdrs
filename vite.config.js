@@ -7,7 +7,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://sdrsapi.xtown.in',
+        // target: 'http://localhost:5000',
+        target: 'https://sdrsapi.sdrsgoldfinance.com',
+
         changeOrigin: true,
       },
     },

@@ -46,47 +46,50 @@ const SecureCertificateViewer = ({ imageId, className = "" }) => {
             // Keywords to look for
             const sensitiveKeywords = ['gstin', 'no', 'registration', 'license', 'certificate', 'number', 'sl', 'id'];
             
-            words.forEach((word, index) => {
-              const text = word.text.toLowerCase().replace(/[^a-z]/g, '');
-              
-              if (sensitiveKeywords.some(kw => text.includes(kw))) {
-                // If we find a keyword, blur the word itself and the next 2 words (likely the value)
-                for (let i = 0; i < 3; i++) {
-                  const targetWord = words[index + i];
-                  if (targetWord && targetWord.confidence > 50) {
-                    const { x0, y0, x1, y1 } = targetWord.bbox;
-                    const padding = 5;
-                    
-                    // Apply blur to this area
-                    ctx.save();
-                    ctx.filter = 'blur(8px)';
-                    ctx.drawImage(
-                      canvas, 
-                      x0 - padding, y0 - padding, (x1 - x0) + padding * 2, (y1 - y0) + padding * 2,
-                      x0 - padding, y0 - padding, (x1 - x0) + padding * 2, (y1 - y0) + padding * 2
-                    );
-                    ctx.restore();
+            if (words && Array.isArray(words)) {
+              words.forEach((word, index) => {
+                if (!word || !word.text) return;
+                const text = word.text.toLowerCase().replace(/[^a-z]/g, '');
+                
+                if (sensitiveKeywords.some(kw => text.includes(kw))) {
+                  // If we find a keyword, blur the word itself and the next 2 words (likely the value)
+                  for (let i = 0; i < 3; i++) {
+                    const targetWord = words[index + i];
+                    if (targetWord && targetWord.confidence > 50) {
+                      const { x0, y0, x1, y1 } = targetWord.bbox;
+                      const padding = 5;
+                      
+                      // Apply blur to this area
+                      ctx.save();
+                      ctx.filter = 'blur(8px)';
+                      ctx.drawImage(
+                        canvas, 
+                        x0 - padding, y0 - padding, (x1 - x0) + padding * 2, (y1 - y0) + padding * 2,
+                        x0 - padding, y0 - padding, (x1 - x0) + padding * 2, (y1 - y0) + padding * 2
+                      );
+                      ctx.restore();
 
-                    // Optional: Add a subtle overlay to indicate redacted area
-                    ctx.fillStyle = 'rgba(212, 175, 55, 0.1)';
-                    ctx.fillRect(x0 - padding, y0 - padding, (x1 - x0) + padding * 2, (y1 - y0) + padding * 2);
+                      // Optional: Add a subtle overlay to indicate redacted area
+                      ctx.fillStyle = 'rgba(212, 175, 55, 0.1)';
+                      ctx.fillRect(x0 - padding, y0 - padding, (x1 - x0) + padding * 2, (y1 - y0) + padding * 2);
+                    }
                   }
                 }
-              }
 
-              // Also detect strings that look like long numbers or codes (10+ chars)
-              if (word.text.length > 8 && (/\d/.test(word.text)) && word.confidence > 60) {
-                const { x0, y0, x1, y1 } = word.bbox;
-                ctx.save();
-                ctx.filter = 'blur(10px)';
-                ctx.drawImage(
-                  canvas, 
-                  x0 - 2, y0 - 2, (x1 - x0) + 4, (y1 - y0) + 4,
-                  x0 - 2, y0 - 2, (x1 - x0) + 4, (y1 - y0) + 4
-                );
-                ctx.restore();
-              }
-            });
+                // Also detect strings that look like long numbers or codes (8+ chars)
+                if (word.text.length > 8 && (/\d/.test(word.text)) && word.confidence > 60) {
+                  const { x0, y0, x1, y1 } = word.bbox;
+                  ctx.save();
+                  ctx.filter = 'blur(10px)';
+                  ctx.drawImage(
+                    canvas, 
+                    x0 - 2, y0 - 2, (x1 - x0) + 4, (y1 - y0) + 4,
+                    x0 - 2, y0 - 2, (x1 - x0) + 4, (y1 - y0) + 4
+                  );
+                  ctx.restore();
+                }
+              });
+            }
           } catch (ocrError) {
             console.warn('OCR failed, proceeding without selective blur:', ocrError);
           }

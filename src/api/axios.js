@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Base URL is the root domain. We add /api here so all calls start with /api
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://sdrsapi.sdrsgoldfinance.com') + '/api';
+// Using relative path '/api' leverages the Vite proxy and avoids CORS issues in local development.
+const API_BASE_URL = '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
