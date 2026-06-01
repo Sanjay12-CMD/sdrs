@@ -1,0 +1,29 @@
+{
+  "current": {
+    "gold24k": "15818",
+    "gold22k": "14500",
+    "gold18k": "11864",
+    "silver": "290",
+    "updatedAt": "2026-06-01T04:08:48.000Z"
+  },
+  "history": [
+    {
+      "gold24k": "15818",
+      "gold22k": "14500",
+      "gold18k": "11864",
+      "silver": "290",
+      "updatedAt": "2026-06-01T04:08:48.000Z",
+      "savedAt": "2026-06-01T05:50:23.923Z",
+      "source": "livechennai"
+    },
+    {
+      "gold24k": "15960",
+      "gold22k": "14630",
+      "gold18k": "11970",
+      "silver": "290",
+      "updatedAt": "2026-05-31T06:08:48.000Z",
+      "savedAt": "2026-05-31T06:08:48.000Z",
+      "source": "seed"
+    }
+  ]
+}

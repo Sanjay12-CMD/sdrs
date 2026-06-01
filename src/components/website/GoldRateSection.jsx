@@ -2,53 +2,25 @@ import React, { useEffect, useEffectEvent, useState } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Clock, MapPin } from 'lucide-react';
 
-const LIVE_CHENNAI_SOURCE_URL = import.meta.env.VITE_LIVE_RATE_SOURCE_URL || 'https://www.livechennai.com/gold_silverrate.asp';
-const LIVE_CHENNAI_PROXY_URL = import.meta.env.VITE_LIVE_RATE_PROXY_URL || 'https://api.allorigins.win/raw?url=';
-const GOLD_RATE_CACHE_KEY = 'sdrs-gold-rate-cache';
+const GOLD_RATE_ENDPOINT = '/api/v1/gold-rates/chennai';
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const INDIA_TIME_ZONE = 'Asia/Kolkata';
-const FALLBACK_MARKET_RATES = {
-  gold24k: 15960,
-  gold22k: 14630,
-  gold18k: 11970,
-  silver: 290,
-  trends: {
-    gold24k: 'up',
-    gold22k: 'up',
-    gold18k: 'up',
-    silver: 'up'
-  }
-};
 const EMPTY_RATES = {
   gold24k: null,
   gold22k: null,
   gold18k: null,
   silver: null,
   updatedAt: null,
-  trends: {
-    gold24k: 'up',
-    gold22k: 'up',
-    gold18k: 'up',
-    silver: 'up'
-  }
 };
 
 const getCurrentDate = () => new Date();
-
-const getIndiaDateKey = (date = getCurrentDate()) =>
-  new Intl.DateTimeFormat('en-CA', {
-    timeZone: INDIA_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).format(date);
 
 const formatDisplayDate = (date) =>
   new Intl.DateTimeFormat('en-GB', {
     timeZone: INDIA_TIME_ZONE,
     day: '2-digit',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
   }).format(date);
 
 const formatDisplayTime = (date) =>
@@ -56,8 +28,10 @@ const formatDisplayTime = (date) =>
     timeZone: INDIA_TIME_ZONE,
     hour: '2-digit',
     minute: '2-digit',
-    hour12: true
-  }).format(date).toUpperCase();
+    hour12: true,
+  })
+    .format(date)
+    .toUpperCase();
 
 const formatRate = (value) => {
   if (value === null || value === undefined || value === '') {
@@ -73,88 +47,17 @@ const formatRate = (value) => {
 
   return new Intl.NumberFormat('en-IN', {
     minimumFractionDigits: hasDecimals ? 2 : 0,
-    maximumFractionDigits: hasDecimals ? 2 : 0
+    maximumFractionDigits: hasDecimals ? 2 : 0,
   }).format(numericValue);
 };
 
-const parseNumericRate = (value) => {
-  if (!value) {
+const parseRateValue = (value) => {
+  if (value === null || value === undefined || value === '') {
     return null;
   }
 
-  const sanitizedValue = value.replace(/,/g, '').trim();
-  const numericValue = Number(sanitizedValue);
+  const numericValue = Number(value);
   return Number.isNaN(numericValue) ? null : numericValue;
-};
-
-const extractLiveChennaiTableRows = (html) => {
-  const rowPattern = /(\d{2}\/[A-Za-z]{3}\/\d{4})\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)/g;
-  const rows = [];
-  let match;
-
-  while ((match = rowPattern.exec(html)) !== null) {
-    rows.push({
-      date: match[1],
-      gold24k1g: parseNumericRate(match[2]),
-      gold24k8g: parseNumericRate(match[3]),
-      gold22k1g: parseNumericRate(match[4]),
-      gold22k8g: parseNumericRate(match[5])
-    });
-  }
-
-  return rows;
-};
-
-const extractSilverRows = (html) => {
-  const silverSectionMatch = html.match(/Chennai Silver Rate[\s\S]*?Date Silver 1 Gm Ready Silver \(1 Kg\)([\s\S]*?)##\s+Gold Rate in Chennai/i);
-  if (!silverSectionMatch) {
-    return [];
-  }
-
-  const rowPattern = /(\d{2}\/[A-Za-z]{3}\/\d{4})\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)/g;
-  const rows = [];
-  let match;
-
-  while ((match = rowPattern.exec(silverSectionMatch[1])) !== null) {
-    rows.push({
-      date: match[1],
-      silver1g: parseNumericRate(match[2]),
-      silver1kg: parseNumericRate(match[3])
-    });
-  }
-
-  return rows;
-};
-
-const parseLiveChennaiUpdatedAt = (html) => {
-  const updateMatch = html.match(/Last Update Time:\s*(\d{2})\/(\d{2})\/(\d{4})\s+(\d{1,2}:\d{2}:\d{2}\s*[AP]M)/i);
-  if (!updateMatch) {
-    return getCurrentDate();
-  }
-
-  const [, day, month, year, time] = updateMatch;
-  const normalizedTime = time.toUpperCase().replace(/\s+/g, ' ');
-  return new Date(`${year}-${month}-${day}T${convertTo24HourTime(normalizedTime)}+05:30`);
-};
-
-const convertTo24HourTime = (timeString) => {
-  const timeMatch = timeString.match(/(\d{1,2}):(\d{2}):(\d{2})\s*([AP]M)/i);
-  if (!timeMatch) {
-    return '00:00:00';
-  }
-
-  let [, hour, minute, second, meridiem] = timeMatch;
-  let normalizedHour = Number(hour);
-
-  if (meridiem.toUpperCase() === 'PM' && normalizedHour !== 12) {
-    normalizedHour += 12;
-  }
-
-  if (meridiem.toUpperCase() === 'AM' && normalizedHour === 12) {
-    normalizedHour = 0;
-  }
-
-  return `${String(normalizedHour).padStart(2, '0')}:${minute}:${second}`;
 };
 
 const RateCard = ({ title, weight, rate, trend, delay, isLoading, status }) => {
@@ -199,109 +102,62 @@ const GoldRateSection = () => {
   const [rates, setRates] = useState({
     ...EMPTY_RATES,
     lastUpdated: '--:--',
-    lastUpdatedDate: '-- --- ----'
+    lastUpdatedDate: '-- --- ----',
   });
   const [loading, setLoading] = useState(true);
   const [fetchStatus, setFetchStatus] = useState('idle');
-
-  const buildFallbackPayload = () => ({
-    ...FALLBACK_MARKET_RATES,
-    updatedAt: getCurrentDate().toISOString()
-  });
+  const [previousRates, setPreviousRates] = useState(null);
 
   const applyRates = (payload) => {
     const dateObj = payload.updatedAt ? new Date(payload.updatedAt) : getCurrentDate();
+
+    setPreviousRates((currentRates) => ({
+      gold24k: parseRateValue(currentRates?.gold24k),
+      gold22k: parseRateValue(currentRates?.gold22k),
+      gold18k: parseRateValue(currentRates?.gold18k),
+      silver: parseRateValue(currentRates?.silver),
+    }));
 
     setRates((prev) => ({
       ...prev,
       ...payload,
       lastUpdated: formatDisplayTime(dateObj),
       lastUpdatedDate: formatDisplayDate(dateObj),
-      trends: payload.trends || prev.trends
     }));
   };
 
-  const getCachedRates = () => {
-    try {
-      const cachedRates = localStorage.getItem(GOLD_RATE_CACHE_KEY);
-      if (!cachedRates) {
-        return null;
-      }
-
-      const parsedCache = JSON.parse(cachedRates);
-      if (!parsedCache?.payload) {
-        return null;
-      }
-
-      if (parsedCache.dateKey !== getIndiaDateKey()) {
-        return null;
-      }
-
-      return parsedCache.payload;
-    } catch (cacheError) {
-      console.error('Failed to read cached gold rates:', cacheError);
-      return null;
-    }
-  };
-
-  const buildLiveChennaiRates = (html) => {
-    const goldRows = extractLiveChennaiTableRows(html);
-    const silverRows = extractSilverRows(html);
-
-    if (goldRows.length < 1 || silverRows.length < 1) {
-      throw new Error('LiveChennai page format changed');
-    }
-
-    const todayGold = goldRows[0];
-    const previousGold = goldRows[1] || goldRows[0];
-    const todaySilver = silverRows[0];
-    const previousSilver = silverRows[1] || silverRows[0];
-    const gold18k = Math.round((todayGold.gold24k1g * 0.75));
-    const previous18k = Math.round((previousGold.gold24k1g * 0.75));
-    const updatedAt = parseLiveChennaiUpdatedAt(html);
+  const buildTrends = () => {
+    const currentGold24k = parseRateValue(rates.gold24k);
+    const currentGold22k = parseRateValue(rates.gold22k);
+    const currentGold18k = parseRateValue(rates.gold18k);
+    const currentSilver = parseRateValue(rates.silver);
 
     return {
-      gold24k: todayGold.gold24k1g,
-      gold22k: todayGold.gold22k1g,
-      gold18k,
-      silver: todaySilver.silver1g,
-      updatedAt: updatedAt.toISOString(),
-      trends: {
-        gold24k: todayGold.gold24k1g >= previousGold.gold24k1g ? 'up' : 'down',
-        gold22k: todayGold.gold22k1g >= previousGold.gold22k1g ? 'up' : 'down',
-        gold18k: gold18k >= previous18k ? 'up' : 'down',
-        silver: todaySilver.silver1g >= previousSilver.silver1g ? 'up' : 'down'
-      }
+      gold24k:
+        previousRates?.gold24k !== null && previousRates?.gold24k !== undefined && currentGold24k !== null
+          ? currentGold24k >= previousRates.gold24k
+            ? 'up'
+            : 'down'
+          : 'up',
+      gold22k:
+        previousRates?.gold22k !== null && previousRates?.gold22k !== undefined && currentGold22k !== null
+          ? currentGold22k >= previousRates.gold22k
+            ? 'up'
+            : 'down'
+          : 'up',
+      gold18k:
+        previousRates?.gold18k !== null && previousRates?.gold18k !== undefined && currentGold18k !== null
+          ? currentGold18k >= previousRates.gold18k
+            ? 'up'
+            : 'down'
+          : 'up',
+      silver:
+        previousRates?.silver !== null && previousRates?.silver !== undefined && currentSilver !== null
+          ? currentSilver >= previousRates.silver
+            ? 'up'
+            : 'down'
+          : 'up',
     };
-  };
-
-  const fetchLiveChennaiRates = async () => {
-    const response = await fetch(`${LIVE_CHENNAI_PROXY_URL}${encodeURIComponent(LIVE_CHENNAI_SOURCE_URL)}`, {
-      method: 'GET',
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, max-age=0',
-        Pragma: 'no-cache',
-        Expires: '0'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('LiveChennai request failed');
-    }
-
-    const html = await response.text();
-    const payload = buildLiveChennaiRates(html);
-
-    localStorage.setItem(
-      GOLD_RATE_CACHE_KEY,
-      JSON.stringify({
-        dateKey: getIndiaDateKey(),
-        payload
-      })
-    );
-
-    return payload;
   };
 
   const fetchRates = useEffectEvent(async ({ isBackgroundRefresh = false } = {}) => {
@@ -312,32 +168,34 @@ const GoldRateSection = () => {
     setFetchStatus((currentStatus) => (currentStatus === 'live' && isBackgroundRefresh ? currentStatus : 'refreshing'));
 
     try {
-      const payload = await fetchLiveChennaiRates();
-      applyRates(payload);
-      setFetchStatus('live');
-    } catch (err) {
-      console.error('Failed to fetch Chennai market rates:', err);
-      const cachedPayload = getCachedRates();
-      const fallbackPayload = cachedPayload || buildFallbackPayload();
+      const response = await fetch(GOLD_RATE_ENDPOINT, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, max-age=0',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      });
 
-      applyRates(fallbackPayload);
-      setFetchStatus(cachedPayload ? 'stale' : 'error');
+      if (!response.ok) {
+        throw new Error('Chennai gold rate request failed');
+      }
+
+      const payload = await response.json();
+      const source = response.headers.get('X-Rate-Source') === 'live' ? 'live' : 'saved';
+
+      applyRates(payload);
+      setFetchStatus(source);
+    } catch (error) {
+      console.error('Failed to fetch Chennai market rates:', error);
+      setFetchStatus('saved');
     } finally {
       setLoading(false);
     }
   });
 
   useEffect(() => {
-    const cachedPayload = getCachedRates();
-
-    if (cachedPayload) {
-      applyRates(cachedPayload);
-      setFetchStatus('stale');
-      setLoading(false);
-    } else {
-      applyRates(buildFallbackPayload());
-    }
-
     fetchRates({ isBackgroundRefresh: false });
 
     const interval = setInterval(() => {
@@ -346,6 +204,8 @@ const GoldRateSection = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  const trends = buildTrends();
 
   return (
     <section className="py-20 relative overflow-hidden">
@@ -385,7 +245,7 @@ const GoldRateSection = () => {
             title="Gold 24K"
             weight="1 Gram"
             rate={rates.gold24k}
-            trend={rates.trends?.gold24k || 'up'}
+            trend={trends.gold24k}
             delay={0.1}
             isLoading={loading}
             status={fetchStatus}
@@ -394,7 +254,7 @@ const GoldRateSection = () => {
             title="Gold 22K"
             weight="1 Gram"
             rate={rates.gold22k}
-            trend={rates.trends?.gold22k || 'up'}
+            trend={trends.gold22k}
             delay={0.2}
             isLoading={loading}
             status={fetchStatus}
@@ -403,7 +263,7 @@ const GoldRateSection = () => {
             title="Gold 18K"
             weight="1 Gram"
             rate={rates.gold18k}
-            trend={rates.trends?.gold18k || 'up'}
+            trend={trends.gold18k}
             delay={0.3}
             isLoading={loading}
             status={fetchStatus}
@@ -412,7 +272,7 @@ const GoldRateSection = () => {
             title="Silver"
             weight="1 Gram"
             rate={rates.silver}
-            trend={rates.trends?.silver || 'up'}
+            trend={trends.silver}
             delay={0.4}
             isLoading={loading}
             status={fetchStatus}
