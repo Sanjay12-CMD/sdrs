@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Clock, MapPin } from 'lucide-react';
 
 const GOLD_RATE_ENDPOINT = '/api/v1/gold-rates/chennai';
-const GOLD_RATE_CACHE_KEY = 'sdrs-chennai-market-rates';
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const INDIA_TIME_ZONE = 'Asia/Kolkata';
 const FALLBACK_MARKET_RATES = {
@@ -144,29 +143,6 @@ const GoldRateSection = () => {
   const [fetchStatus, setFetchStatus] = useState('idle');
   const [previousRates, setPreviousRates] = useState(null);
 
-  const getCachedRates = () => {
-    try {
-      const cachedRates = localStorage.getItem(GOLD_RATE_CACHE_KEY);
-      if (!cachedRates) {
-        return null;
-      }
-
-      const parsedCache = JSON.parse(cachedRates);
-      return isValidRatePayload(parsedCache) ? parsedCache : null;
-    } catch (error) {
-      console.error('Failed to read cached Chennai market rates:', error);
-      return null;
-    }
-  };
-
-  const saveCachedRates = (payload) => {
-    try {
-      localStorage.setItem(GOLD_RATE_CACHE_KEY, JSON.stringify(payload));
-    } catch (error) {
-      console.error('Failed to cache Chennai market rates:', error);
-    }
-  };
-
   const applyRates = (payload) => {
     const dateObj = payload.updatedAt ? new Date(payload.updatedAt) : getCurrentDate();
 
@@ -247,20 +223,21 @@ const GoldRateSection = () => {
       }
 
       const source = response.headers.get('X-Rate-Source') === 'live' ? 'live' : 'saved';
-      const nextPayload = pickNewestPayload(payload, getCachedRates(), FALLBACK_MARKET_RATES);
+      const nextPayload = pickNewestPayload(payload, FALLBACK_MARKET_RATES);
 
       if (!nextPayload) {
         throw new Error('Chennai gold rate payload was incomplete');
       }
 
       applyRates(nextPayload);
-      saveCachedRates(nextPayload);
       setFetchStatus(source);
     } catch (error) {
       console.error('Failed to fetch Chennai market rates:', error);
-      const cachedRates = pickNewestPayload(getCachedRates(), FALLBACK_MARKET_RATES);
-      if (cachedRates) {
-        applyRates(cachedRates);
+      if (!isValidRatePayload(rates)) {
+        const fallbackRates = pickNewestPayload(FALLBACK_MARKET_RATES);
+        if (fallbackRates) {
+          applyRates(fallbackRates);
+        }
       }
       setFetchStatus('saved');
     } finally {
