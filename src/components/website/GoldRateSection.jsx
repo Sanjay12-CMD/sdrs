@@ -86,6 +86,16 @@ const isValidRatePayload = (payload) =>
       payload.silver !== ''
   );
 
+const getPayloadTimestamp = (payload) => {
+  const timestamp = new Date(payload?.updatedAt || 0).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
+const pickNewestPayload = (...payloads) =>
+  payloads
+    .filter(isValidRatePayload)
+    .sort((left, right) => getPayloadTimestamp(right) - getPayloadTimestamp(left))[0] || null;
+
 const RateCard = ({ title, weight, rate, trend, delay, isLoading, status }) => {
   const badgeLabel = isLoading ? 'Refreshing' : status === 'live' ? 'Live Chennai Market' : 'Saved Rate';
   const badgeClassName = isLoading
@@ -237,14 +247,21 @@ const GoldRateSection = () => {
       }
 
       const source = response.headers.get('X-Rate-Source') === 'live' ? 'live' : 'saved';
+      const nextPayload = pickNewestPayload(payload, getCachedRates(), FALLBACK_MARKET_RATES);
 
-      applyRates(payload);
-      saveCachedRates(payload);
+      if (!nextPayload) {
+        throw new Error('Chennai gold rate payload was incomplete');
+      }
+
+      applyRates(nextPayload);
+      saveCachedRates(nextPayload);
       setFetchStatus(source);
     } catch (error) {
       console.error('Failed to fetch Chennai market rates:', error);
-      const cachedRates = getCachedRates() || FALLBACK_MARKET_RATES;
-      applyRates(cachedRates);
+      const cachedRates = pickNewestPayload(getCachedRates(), FALLBACK_MARKET_RATES);
+      if (cachedRates) {
+        applyRates(cachedRates);
+      }
       setFetchStatus('saved');
     } finally {
       setLoading(false);
@@ -252,17 +269,6 @@ const GoldRateSection = () => {
   });
 
   useEffect(() => {
-    const cachedRates = getCachedRates();
-    if (cachedRates) {
-      applyRates(cachedRates);
-      setFetchStatus('saved');
-      setLoading(false);
-    } else {
-      applyRates(FALLBACK_MARKET_RATES);
-      setFetchStatus('saved');
-      setLoading(false);
-    }
-
     fetchRates({ isBackgroundRefresh: false });
 
     const interval = setInterval(() => {

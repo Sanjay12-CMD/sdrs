@@ -23,8 +23,11 @@ export default async function handler(req, res) {
   try {
     const { payload, source } = await getChennaiRates({ forceRefresh: true });
     res.setHeader('X-Rate-Source', source);
+    res.setHeader('X-Rate-Updated-At', payload.updatedAt || '');
+    res.setHeader('X-Rate-Fetched-At', payload.fetchedAt || payload.savedAt || '');
     return sendJson(res, 200, payload);
   } catch (error) {
+    console.error('Failed to sync Chennai market rates:', error);
     return sendJson(res, 500, { message: 'Failed to sync Chennai market rates' });
   }
 }

@@ -13,8 +13,11 @@ export default async function handler(req, res) {
     const { payload, source } = await getChennaiRates({ forceRefresh });
 
     res.setHeader('X-Rate-Source', source);
+    res.setHeader('X-Rate-Updated-At', payload.updatedAt || '');
+    res.setHeader('X-Rate-Fetched-At', payload.fetchedAt || payload.savedAt || '');
     return sendJson(res, 200, payload);
   } catch (error) {
+    console.error('Failed to load Chennai market rates:', error);
     return sendJson(res, 500, { message: 'Failed to load Chennai market rates' });
   }
 }

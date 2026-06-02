@@ -63,6 +63,11 @@ const normalizeStore = (parsed) => ({
   history: Array.isArray(parsed?.history) ? parsed.history : [],
 });
 
+const getEntryTimestamp = (entry) => {
+  const timestamp = new Date(entry?.fetchedAt || entry?.savedAt || entry?.updatedAt || 0).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
 const readBundledSeedStore = async () => {
   try {
     const raw = await fs.readFile(BUNDLED_SEED_PATH, 'utf8');
@@ -120,33 +125,53 @@ export const readRateStore = async () => readStoreFile();
 
 export const getStoredRates = async () => {
   const store = await readStoreFile();
-  return store.current;
+  const candidates = [store.current, ...(Array.isArray(store.history) ? store.history : [])].filter(Boolean);
+
+  if (!candidates.length) {
+    return null;
+  }
+
+  return candidates.sort((left, right) => getEntryTimestamp(right) - getEntryTimestamp(left))[0];
 };
 
 export const saveRates = async (payload, source = 'livechennai') => {
   const store = await readStoreFile();
+  const fetchedAt = new Date().toISOString();
+  const nextCurrent = {
+    ...payload,
+    fetchedAt,
+  };
 
-  if (hasSameCurrentPayload(store.current, payload)) {
-    return store.current;
+  if (hasSameCurrentPayload(store.current, nextCurrent)) {
+    const nextStore = {
+      ...store,
+      current: {
+        ...store.current,
+        fetchedAt,
+      },
+    };
+
+    await writeStoreFile(nextStore);
+    return nextStore.current;
   }
 
   const dedupedHistory = store.history.filter(
     (entry) =>
       !(
-        entry.updatedAt === payload.updatedAt &&
-        entry.gold24k === payload.gold24k &&
-        entry.gold22k === payload.gold22k &&
-        entry.gold18k === payload.gold18k &&
-        entry.silver === payload.silver
+        entry.updatedAt === nextCurrent.updatedAt &&
+        entry.gold24k === nextCurrent.gold24k &&
+        entry.gold22k === nextCurrent.gold22k &&
+        entry.gold18k === nextCurrent.gold18k &&
+        entry.silver === nextCurrent.silver
       )
   );
 
   const nextStore = {
-    current: payload,
+    current: nextCurrent,
     history: [
       {
-        ...payload,
-        savedAt: new Date().toISOString(),
+        ...nextCurrent,
+        savedAt: fetchedAt,
         source,
       },
       ...dedupedHistory,

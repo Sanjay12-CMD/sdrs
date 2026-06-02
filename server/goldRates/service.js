@@ -2,6 +2,8 @@ import { GOLD_RATE_CACHE_TTL_MS, LIVE_CHENNAI_SOURCE_URL } from './constants.js'
 import { parseLiveChennaiRates } from './parser.js';
 import { getStoredRates, readRateStore, saveRates } from './store.js';
 
+let inFlightLiveRatesPromise = null;
+
 const buildFetchOptions = () => ({
   method: 'GET',
   headers: {
@@ -11,13 +13,14 @@ const buildFetchOptions = () => ({
   },
 });
 
-const isFreshEnough = (updatedAt) => {
-  if (!updatedAt) {
-    return false;
-  }
+const getFreshnessTimestamp = (payload) => {
+  const timestamp = new Date(payload?.fetchedAt || payload?.savedAt || 0).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
 
-  const timestamp = new Date(updatedAt).getTime();
-  if (Number.isNaN(timestamp)) {
+const isFreshEnough = (payload) => {
+  const timestamp = getFreshnessTimestamp(payload);
+  if (!timestamp) {
     return false;
   }
 
@@ -35,11 +38,24 @@ export const fetchLiveChennaiRates = async () => {
   return parseLiveChennaiRates(html);
 };
 
+const fetchAndPersistLiveRates = async () => {
+  const liveRates = await fetchLiveChennaiRates();
+  let savedRates = liveRates;
+
+  try {
+    savedRates = await saveRates(liveRates, 'livechennai');
+  } catch (storageError) {
+    console.error('Failed to persist Chennai market rates:', storageError);
+  }
+
+  return savedRates;
+};
+
 export const getChennaiRates = async ({ forceRefresh = false } = {}) => {
   const store = await readRateStore();
   const storedRates = store.current;
 
-  if (!forceRefresh && storedRates && isFreshEnough(storedRates.updatedAt)) {
+  if (!forceRefresh && storedRates && isFreshEnough(storedRates)) {
     return {
       payload: storedRates,
       source: 'live',
@@ -47,14 +63,19 @@ export const getChennaiRates = async ({ forceRefresh = false } = {}) => {
   }
 
   try {
-    const liveRates = await fetchLiveChennaiRates();
-    let savedRates = liveRates;
-
-    try {
-      savedRates = await saveRates(liveRates, 'livechennai');
-    } catch (storageError) {
-      console.error('Failed to persist Chennai market rates:', storageError);
+    if (!inFlightLiveRatesPromise || forceRefresh) {
+      inFlightLiveRatesPromise = fetchAndPersistLiveRates().finally(() => {
+        inFlightLiveRatesPromise = null;
+      });
     }
+
+    const savedRates = await inFlightLiveRatesPromise;
+
+    console.info('Gold rates served from live source', {
+      updatedAt: savedRates.updatedAt,
+      fetchedAt: savedRates.fetchedAt || null,
+      forceRefresh,
+    });
 
     return {
       payload: savedRates,
@@ -63,6 +84,12 @@ export const getChennaiRates = async ({ forceRefresh = false } = {}) => {
   } catch (error) {
     const fallbackRates = await getStoredRates();
     if (fallbackRates) {
+      console.warn('Gold rates live fetch failed, serving stored fallback', {
+        updatedAt: fallbackRates.updatedAt,
+        fetchedAt: fallbackRates.fetchedAt || null,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
       return {
         payload: fallbackRates,
         source: 'saved',
@@ -70,6 +97,7 @@ export const getChennaiRates = async ({ forceRefresh = false } = {}) => {
       };
     }
 
+    console.error('Gold rates live fetch failed with no stored fallback', error);
     throw error;
   }
 };
