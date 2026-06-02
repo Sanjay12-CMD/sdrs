@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const DEFAULT_CURRENT_RATES = {
   gold24k: '15960',
@@ -11,8 +10,7 @@ const DEFAULT_CURRENT_RATES = {
   updatedAt: '2026-05-31T06:08:48.000Z',
 };
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BUNDLED_SEED_PATH = path.resolve(__dirname, '../../data/chennai-market-rates.json');
+const BUNDLED_SEED_PATH = path.resolve(process.cwd(), 'data/chennai-market-rates.json');
 const DEFAULT_RUNTIME_STORE_PATH = path.join(os.tmpdir(), 'sdrs-chennai-market-rates.json');
 const STORE_PATH = process.env.GOLD_RATE_STORE_PATH || DEFAULT_RUNTIME_STORE_PATH;
 const REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || '';
